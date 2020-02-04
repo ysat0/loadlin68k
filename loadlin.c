@@ -301,17 +301,21 @@ struct mem_info {
 
 unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
 {
-	void *bi_ptr = kernel + size;
+	void *bi_ptr;
 	struct bi_record *bi;
 	char *cmdline;
+
+	size += 0x1000;
+	size &= ~0xfff;
+	bi_ptr = kernel + size;
 	BI(BI_MACHTYPE, 4);
-	*(unsigned int *)bi->data[0] = MACH_X68000;
+	bi->data[0] = MACH_X68000;
 	BI(BI_FPUTYPE, 4);
-	*(unsigned int *)bi->data[0] = 0;
+	bi->data[0] = 0;
 	BI(BI_MMUTYPE, 4);
-	*(unsigned int *)bi->data[0] = MMU_68030;
+	bi->data[0] = MMU_68030;
 	BI(BI_CPUTYPE, 4);
-	*(unsigned int *)bi->data[0] = CPU_68030;
+	bi->data[0] = CPU_68030;
 	bi = bi_ptr;
 	bi->tag = BI_MEMCHUNK;
 	bi->size = 8;
