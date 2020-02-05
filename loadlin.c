@@ -291,12 +291,12 @@ struct mem_info {
 #define MMU_68040		(1 << MMUB_68040)
 #define MMU_68060		(1 << MMUB_68060)
 
-#define BI(_tag, _size)			\
+#define BI(_tag, _size)				\
 	do {					\
 		bi = bi_ptr;			\
 		bi->tag = _tag;			\
 		bi->size = _size;		\
-		bi_ptr += 6 + size;		\
+		bi_ptr += 6 + _size;		\
 	} while(0)
 
 unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
@@ -332,6 +332,18 @@ unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
 	return bi_ptr - kernel + 256;
 }
 
+void enter_kernel(int video)
+{
+	if (video) {
+		fprintf(stderr, "\x1b[>5h");
+		_iocs_crtmod(0x10);
+		_iocs_g_clr_on();
+	}
+	*(volatile char *)0xe8801d = 0x00;
+	*(volatile char *)0xe98001 = 9;
+	*(volatile char *)0xe98001 = 0x40;
+}
+
 int main(int argc, char *argv[])
 {
 	char args[512];
@@ -359,28 +371,22 @@ int main(int argc, char *argv[])
 		strcat(args, argv[i]);
 		strcat(args, " ");
 	}
-	fprintf(stderr, "Kernel args=%s", args);
-	if (video) {
-		fprintf(stderr, "\x1b[>5h");
-		_iocs_crtmod(0x10);
-		_iocs_g_clr_on();
-	}
+	fprintf(stderr, "Kernel args=%s\n", args);
 	sp = _dos_super(0);
-	*(volatile char *)0xe8801d = 0x00;
-	*(volatile char *)0xe98001 = 9;
-	*(volatile char *)0xe98001 = 0x40;
 	cpu = *(volatile char *)0xcbc;
 	switch (cpu) {
 	case 0:
+		enter_kernel(video);
 		start_kernel_000(kernel, raw_size, args);
 		break;
 	case 3:
 		raw_size += build_bootinfo(kernel, raw_size, args);
+		enter_kernel(video);
 		start_kernel_030(kernel, raw_size);
 		break;
 	default:
 		fprintf(stderr, "Unsupported CPU\n");
-		_dos_super(sp);
 	}
+	_dos_super(sp);
 	return 0;
 }
