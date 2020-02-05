@@ -295,8 +295,8 @@ struct mem_info {
 	do {					\
 		bi = bi_ptr;			\
 		bi->tag = _tag;			\
-		bi->size = _size;		\
-		bi_ptr += 6 + _size;		\
+		bi->size = 4 + _size;		\
+		bi_ptr += 4 + _size;		\
 	} while(0)
 
 unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
@@ -316,19 +316,13 @@ unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
 	bi->data[0] = MMU_68030;
 	BI(BI_CPUTYPE, 4);
 	bi->data[0] = CPU_68030;
-	bi = bi_ptr;
-	bi->tag = BI_MEMCHUNK;
-	bi->size = 8;
+	BI(BI_MEMCHUNK, 8);
 	bi->data[0] = 0x00000000;
 	bi->data[1] = 0x00c00000;
-	bi = bi_ptr + 14;
-	bi->tag = BI_COMMAND_LINE;
-	bi->size = 4;
-	cmdline = bi_ptr + 10 + 6;
-	bi->data[0] = (unsigned long)cmdline;
-	bi = bi_ptr + 10;
+	BI(BI_COMMAND_LINE, 256);
+	strcpy((char *)(bi->data), args);
 	BI(BI_LAST, 0);
-	strcpy(cmdline, args);
+
 	return bi_ptr - kernel + 256;
 }
 
