@@ -291,6 +291,18 @@ struct mem_info {
 #define MMU_68040		(1 << MMUB_68040)
 #define MMU_68060		(1 << MMUB_68060)
 
+#define FPUB_68881		0
+#define FPUB_68882		1
+#define FPUB_68040		2	/* Internal FPU */
+#define FPUB_68060		3	/* Internal FPU */
+#define FPUB_SUNFPA		4	/* Sun-3 FPA */
+#define FPUB_COLDFIRE		5	/* ColdFire FPU */
+
+#define FPU_68881		(1 << FPUB_68881)
+#define FPU_68882		(1 << FPUB_68882)
+#define FPU_68040		(1 << FPUB_68040)
+#define FPU_68060		(1 << FPUB_68060)
+
 #define BI(_tag, _size)				\
 	do {					\
 		bi = bi_ptr;			\
@@ -311,7 +323,7 @@ unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
 	BI(BI_MACHTYPE, 4);
 	bi->data[0] = MACH_X68000;
 	BI(BI_FPUTYPE, 4);
-	bi->data[0] = 0;
+	bi->data[0] = FPU_68881;
 	BI(BI_MMUTYPE, 4);
 	bi->data[0] = MMU_68030;
 	BI(BI_CPUTYPE, 4);
