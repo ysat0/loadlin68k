@@ -323,7 +323,7 @@ unsigned long build_bootinfo(void *kernel, unsigned long size, char *args)
 	BI(BI_MACHTYPE, 4);
 	bi->data[0] = MACH_X68000;
 	BI(BI_FPUTYPE, 4);
-	bi->data[0] = FPU_68881;
+	bi->data[0] = FPU_68882;
 	BI(BI_MMUTYPE, 4);
 	bi->data[0] = MMU_68030;
 	BI(BI_CPUTYPE, 4);
