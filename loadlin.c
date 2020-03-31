@@ -210,6 +210,8 @@ char *kernel;
 char *raw_ptr;
 unsigned long raw_size;
 
+#define KERNEL_SIZE 0x00800000
+
 static void error(char *x)
 {
 	puts(x);
@@ -223,14 +225,17 @@ static long read_stream(void *buf, unsigned long size)
 
 static long write_raw(void *buf, unsigned long size)
 {
-	memcpy(raw_ptr, buf, size);
-	raw_ptr += size;
-	raw_size += size;
-	fputc('.', stderr);
+	if (KERNEL_SIZE >= (raw_size + size)) {
+		memcpy(raw_ptr, buf, size);
+		raw_ptr += size;
+		raw_size += size;
+		fputc('.', stderr);
+	} else {
+		fprintf(stderr, "Kernel image too large\n");
+		size = -1;
+	}
 	return size;
 }
-
-#define KERNEL_SIZE 0x00200000
 
 void decompress_kernel(char *name, char *load)
 {
